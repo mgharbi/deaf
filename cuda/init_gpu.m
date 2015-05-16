@@ -16,8 +16,8 @@ end
 
 data.gpu.device_index = device_index;
 
-%dev = getvalue(data, 'gpu.dev', []);
-%if isempty(dev) || dev.Index ~= device_index
+dev = getvalue(data, 'gpu.dev', []);
+if isempty(dev) || dev.Index ~= device_index
     data.gpu.dev = [];
 
     gpuDevice(device_index);
@@ -34,7 +34,7 @@ data.gpu.device_index = device_index;
     compile_kernels();
 
     reinit = 1;
-%end
+end
 
 precision = 'single';%getvalue(config.gpu, 'precision', 'double');
 if ~strcmp(precision, data.gpu.float_t)
