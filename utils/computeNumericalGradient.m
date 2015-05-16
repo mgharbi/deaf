@@ -1,7 +1,7 @@
 function numgrad = computeNumericalGradient(image, label, weight_idx)
     global config mem;
     estimatedGrad = mem.grads;
-    epsilon = config.NEW_MEM(0.1);
+    epsilon = config.NEW_MEM(0.01);
     % Initialize numgrad with zeros
     numgrad = zeros(size(config.weights{weight_idx}));
     %{
