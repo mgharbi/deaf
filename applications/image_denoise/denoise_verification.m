@@ -29,7 +29,18 @@ label = config.NEW_MEM((image(1:config.output_size(1), 1:config.output_size(2), 
 image = repmat(image, 1,1,1,config.batch_size);
 label = repmat(label, 1,1,1,config.batch_size);
 
+% gradient checking
 op_train_pipe(image, label);
 computeNumericalGradient(image, label, 1);
+
+% speed test
+loop = 100;
+tic
+for m = 1:loop
+    op_train_pipe(image, label);
+end
+elapse = toc/loop/config.batch_size;
+num = 1 / elapse;
+fprintf('Process %f samples per second.\n', num);
 
 
