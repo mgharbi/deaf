@@ -60,10 +60,33 @@ function init(flag)
             conv_layer_c = conv_layer_c + 1;
             config.feature_map_sizes{idx} = [config.input_size(1)-config.kernel_size(1,1)+1 config.input_size(2)-config.kernel_size(1,2)+1 ...
                                              config.conv_hidden_size(conv_layer_c)];
-            config.weights{idx} = config.NEW_MEM(randn(config.feature_map_sizes{idx}(3), ...
-                                          config.kernel_size(conv_layer_c, 1)*config.kernel_size(conv_layer_c, 2)*config.chs)*r);
-            if config.normalize_init_weights
-                config.weights{idx} = config.weights{idx} / sqrt(config.kernel_size(conv_layer_c, 1) * config.kernel_size(conv_layer_c, 2) * config.conv_hidden_size(conv_layer_c));
+            config.misc.mask_type = 16;     % hard code here for now
+            %config.misc.mask_type = 4;
+            if strcmp(config.forward_pass_scheme{idx}, 'conv_v_sr')
+                config.weights{idx} = {};
+                for t = 1:config.misc.mask_type
+                    config.weights{idx}{t} = config.NEW_MEM(randn(config.feature_map_sizes{idx}(3), ...
+                                              config.kernel_size(conv_layer_c, 1)*config.kernel_size(conv_layer_c, 2)*config.chs)*r);
+                end
+                % create mask and generate conv index
+                mask_mem();
+                %mask = config.NEW_MEM([1 0;0 0]);
+                mask = config.NEW_MEM([1 0 0 0;0 0 0 0;0 0 0 0;0 0 0 0]);
+                mask = repmat(mask, config.input_size(1)/sqrt(config.misc.mask_type), config.input_size(2)/sqrt(config.misc.mask_type), config.chs);
+                mask = repmat(mask, 1,1,1,config.batch_size);
+                mask2conv(mask);
+            elseif strcmp(config.forward_pass_scheme{idx}, 'conv_v')
+                config.weights{idx} = config.NEW_MEM(randn(config.feature_map_sizes{idx}(3), ...
+                                              config.kernel_size(conv_layer_c, 1)*config.kernel_size(conv_layer_c, 2)*config.chs)*r);
+                if config.normalize_init_weights
+                    config.weights{idx} = config.weights{idx} / sqrt(config.kernel_size(conv_layer_c, 1) * config.kernel_size(conv_layer_c, 2) * config.conv_hidden_size(conv_layer_c));
+                end
+            elseif strcmp(config.forward_pass_scheme{idx}, 'conv_v_mask_norm')
+                config.weights{idx} = config.NEW_MEM(randn(config.feature_map_sizes{idx}(3), ...
+                                              config.kernel_size(conv_layer_c, 1)*config.kernel_size(conv_layer_c, 2)*config.chs)*r) + r;
+                if config.normalize_init_weights
+                    config.weights{idx} = config.weights{idx} / sqrt(config.kernel_size(conv_layer_c, 1) * config.kernel_size(conv_layer_c, 2) * config.conv_hidden_size(conv_layer_c));
+                end
             end
         elseif strcmp(config.forward_pass_scheme{idx}, 'conv_v')
             conv_layer_c = conv_layer_c + 1;
@@ -122,11 +145,19 @@ function init(flag)
     % prepare memory
     reset_mem();
     input_mem();
+    if strcmp(config.forward_pass_scheme{1}, 'conv_v_mask_norm')
+        mask_mem();
+    end
+    if strcmp(config.forward_pass_scheme{2}, 'conv_v')
+        conv2conv_mem(1);
+    end
     for m = 2:layer_num
         if strfind(config.forward_pass_scheme{m}, 'conv')
             conv_mem(m);
             if strcmp(config.forward_pass_scheme{m+1}, 'out')
                 conv2out_mem();
+            elseif strcmp(config.forward_pass_scheme{m+1}, 'conv_v')
+                conv2conv_mem(m);
             end
         elseif strcmp(config.forward_pass_scheme{m}, 'pool')
             pool_mem(m);
@@ -141,21 +172,33 @@ function init(flag)
     % building pipeline
     config.pipeline_forward = {};
     config.pipeline_forward{1} = @input2conv;
+    if strcmp(config.forward_pass_scheme{1}, 'conv_v_mask_norm')
+        config.pipeline_forward{2} = @mask2conv;
+    end
     conv_layer_c = 1;
     for idx = 1:layer_num
         if strfind(config.forward_pass_scheme{idx}, 'conv')
             conv_layer_c = conv_layer_c + 1;
-            config.pipeline_forward{length(config.pipeline_forward)+1} = @conv_forward;
+            if strcmp(config.forward_pass_scheme{idx}, 'conv_v_sr')
+                config.pipeline_forward{length(config.pipeline_forward)+1} = @conv_forward_SR;
+            else
+                config.pipeline_forward{length(config.pipeline_forward)+1} = @conv_forward;
+            end
+            if strcmp(config.forward_pass_scheme{idx}, 'conv_v_mask_norm')
+                config.pipeline_forward{length(config.pipeline_forward)+1} = @mask_conv_forward;
+                config.pipeline_forward{length(config.pipeline_forward)+1} = @mask_normalize;
+            end
             if strcmp(config.forward_pass_scheme{idx+1}, 'conv_v')
                 config.pipeline_forward{length(config.pipeline_forward)+1} = @nonlinearity;
                 if config.kernel_size(conv_layer_c, 1) == 1 && config.kernel_size(conv_layer_c, 2) == 1
                     config.pipeline_forward{length(config.pipeline_forward)+1} = @conv2conv1by1;
                 else
-                    fprintf('in init(): conv_v after a conv layer not supported yet.\n');
+                    %fprintf('in init(): conv_v after a conv layer not supported yet.\n');
+                    config.pipeline_forward{length(config.pipeline_forward)+1} = @conv2conv;
                 end
             elseif strcmp(config.forward_pass_scheme{idx+1}, 'conv_f')
                 config.pipeline_forward{length(config.pipeline_forward)+1} = @nonlinearity;
-                config.pipeline_forward{length(config.pipeline_forward)+1} = @conv2conv;
+                config.pipeline_forward{length(config.pipeline_forward)+1} = @conv2conv_f;
             elseif strcmp(config.forward_pass_scheme{idx+1}, 'pool')
                 config.pipeline_forward{length(config.pipeline_forward)+1} = @nonlinearity;
                 config.pipeline_forward{length(config.pipeline_forward)+1} = @conv2pool;
@@ -231,6 +274,11 @@ function init(flag)
         if strcmp(config.forward_pass_scheme{m}, 'conv_v')            
             if strcmp(config.forward_pass_scheme{m-1}, 'pool')
                 convBpool_mem(m);
+            elseif strfind(config.forward_pass_scheme{m}, 'conv')
+                conv_layer_id = get_conv_layer_idx_from_layer_idx(m);
+                if config.kernel_size(conv_layer_id, 1) ~= 1 && config.kernel_size(conv_layer_id, 2) ~= 1
+                    convBconv_mem(m);
+                end
             end        
         end
     end
@@ -251,26 +299,33 @@ function init(flag)
                 fprintf('in init(): backprop from the output layer to the specified layer is not yet supported.\n');
             end            
         elseif strcmp(config.forward_pass_scheme{idx}, 'conv_f')
-            if strcmp(config.forward_pass_scheme{idx-1}, 'conv_v')
-                config.pipeline_backprop{length(config.pipeline_backprop)+1} = @convBconv;
+            if strcmp(config.forward_pass_scheme{idx-1}, 'conv_v')                
+                config.pipeline_backprop{length(config.pipeline_backprop)+1} = @convBconv_1by1;                
             else
                 fprintf('in init(): backprop from conv_f to the specified layer is not yet supported.\n');
             end
             config.pipeline_backprop{length(config.pipeline_backprop)+1} = @conv_backprop;
         elseif strcmp(config.forward_pass_scheme{idx}, 'conv_v')
-            if strcmp(config.forward_pass_scheme{idx-1}, 'conv_v')
-                config.pipeline_backprop{length(config.pipeline_backprop)+1} = @convBconv;
+            if strfind(config.forward_pass_scheme{idx-1}, 'conv')
+                conv_layer_id = get_conv_layer_idx_from_layer_idx(idx);
+                if config.kernel_size(conv_layer_id, 1) == 1 && config.kernel_size(conv_layer_id, 2) == 1
+                    config.pipeline_backprop{length(config.pipeline_backprop)+1} = @convBconv_1by1;
+                else
+                    config.pipeline_backprop{length(config.pipeline_backprop)+1} = @convBconv;
+                end
+                config.pipeline_backprop{length(config.pipeline_backprop)+1} = @conv_backprop;
             elseif strcmp(config.forward_pass_scheme{idx-1}, 'pool')
                 config.pipeline_backprop{length(config.pipeline_backprop)+1} = @convBpool;
-            end
-            config.pipeline_backprop{length(config.pipeline_backprop)+1} = @conv_backprop;
+                config.pipeline_backprop{length(config.pipeline_backprop)+1} = @pool_backprop;
+            end            
         elseif strcmp(config.forward_pass_scheme{idx}, 'pool')
             if strcmp(config.forward_pass_scheme{idx-1}, 'conv_v')
                 config.pipeline_backprop{length(config.pipeline_backprop)+1} = @poolBconv;
+                config.pipeline_backprop{length(config.pipeline_backprop)+1} = @conv_backprop;
             elseif strcmp(config.forward_pass_scheme{idx-1}, 'pool')
                 config.pipeline_backprop{length(config.pipeline_backprop)+1} = @poolBpool;
-            end
-            config.pipeline_backprop{length(config.pipeline_backprop)+1} = @pool_backprop;
+                config.pipeline_backprop{length(config.pipeline_backprop)+1} = @pool_backprop;
+            end            
         elseif strcmp(config.forward_pass_scheme{idx}, 'full')
             if strcmp(config.forward_pass_scheme{idx-1}, 'full')
                 config.pipeline_backprop{length(config.pipeline_backprop)+1} = @fullBfull;
@@ -282,14 +337,34 @@ function init(flag)
             config.pipeline_backprop{length(config.pipeline_backprop)+1} = @full_backprop;
         end                
     end
-    config.pipeline_backprop{length(config.pipeline_backprop)+1} = @convBinput;
+    if strcmp(config.forward_pass_scheme{2}, 'conv_v') && config.kernel_size(2, 1) ~= 1 && config.kernel_size(2, 2) ~= 1
+        config.pipeline_backprop{length(config.pipeline_backprop)+1} = @convBconv_last;
+    end
+    if strcmp(config.forward_pass_scheme{1}, 'conv_v_mask_norm')
+        config.pipeline_backprop{length(config.pipeline_backprop)+1} = @convBinput_with_mask_accel; %convBinput_with_mask;
+    elseif strcmp(config.forward_pass_scheme{1}, 'conv_v_sr')
+        config.pipeline_backprop{length(config.pipeline_backprop)+1} = @convBinput_SR;
+    else
+        config.pipeline_backprop{length(config.pipeline_backprop)+1} = @convBinput;
+    end    
     
-    if strcmp(config.optimization, 'adagrad')
-        config.UPDATE_WEIGHTS = @update_weights_adagrad;
+    if strcmp(config.optimization, 'adagrad')        
         config.his_grad = {};
         config.fudge_factor = 1e-6;
-        for m = 1:length(config.weights)
-            config.his_grad{m} = config.NEW_MEM(zeros(size(config.weights{m})));
+        if strcmp(config.forward_pass_scheme{1}, 'conv_v_sr')
+            config.UPDATE_WEIGHTS = @update_weights_adagrad_SR;
+            config.his_grad{1} = {};
+            for m = 1:config.misc.mask_type
+                config.his_grad{1}{m} = config.NEW_MEM(zeros(size(config.weights{1}{m})));
+            end
+            for m = 2:length(config.weights)
+                config.his_grad{m} = config.NEW_MEM(zeros(size(config.weights{m})));
+            end
+        else
+            config.UPDATE_WEIGHTS = @update_weights_adagrad;
+            for m = 1:length(config.weights)
+                config.his_grad{m} = config.NEW_MEM(zeros(size(config.weights{m})));
+            end
         end
     else
         fprintf('optimization method not supported, use adagrad as default\n');
