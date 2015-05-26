@@ -10,6 +10,7 @@ function pool2conv()
     input_size(2) = (config.feature_map_sizes{curr_layer_idx-1}(1)-config.kernel_size(conv_layer_idx, 1)+1)*(config.feature_map_sizes{curr_layer_idx-1}(2)-config.kernel_size(conv_layer_idx, 2)+1)*config.batch_size;
     mem.layer_inputs{curr_layer_idx} = reshape(accumarray(mem.pool2conv{curr_layer_idx}{1}, P_expand(:), [input_size(1)*input_size(2), 1]), input_size(1), input_size(2));
     % memory redundancy, need improve
+    mem.orig_activation_size{curr_layer_idx-1} = size(mem.activations{curr_layer_idx-1});
     mem.activations{curr_layer_idx-1} = mem.layer_inputs{curr_layer_idx};
 end
 
