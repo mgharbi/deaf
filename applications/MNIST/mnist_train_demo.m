@@ -19,6 +19,7 @@ clearvars -global mem;
 clear;
 global config mem;
 mnist_configure();
+%mnist_configure_deep();
 init(0);
 
 images_orig = loadMNISTImages('train-images.idx3-ubyte');
