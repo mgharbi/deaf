@@ -4,7 +4,7 @@
 % The 29th AAAI Conference on Artificial Intelligence (AAAI-15). Austin, Texas, USA, January 25-30, 2015
 % email: jimmy.sj.ren@gmail.com
 %--------------------------------------------------------------------------------------------------------
-function mnist_configure2()    
+function mnist_configure_deep()    
     global config;
     % general configurations for both training and testing
     config.input_size = [32 32];
