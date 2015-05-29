@@ -13,12 +13,16 @@ function prepare_net(input_x, input_y, w_path)
     else
         p_size = max_patch_size;
     end
-    
+
+    load(w_path);
+    config = model;
     config.batch_size = 1;
+    config.normalize_init_weights = 0;  % for old version weights
     size_differ = [config.input_size(1)-config.output_size(1) config.input_size(2)-config.output_size(2)];
     config.input_size = [p_size p_size];
     config.output_size = [p_size-size_differ(1) p_size-size_differ(2) config.chs];
     config.size_differ = size_differ;
+    
     init(1);
     load(w_path);
     config.weights = model.weights;
