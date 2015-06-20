@@ -193,7 +193,6 @@ function init(flag)
                 if config.kernel_size(conv_layer_c, 1) == 1 && config.kernel_size(conv_layer_c, 2) == 1
                     config.pipeline_forward{length(config.pipeline_forward)+1} = @conv2conv1by1;
                 else
-                    %fprintf('in init(): conv_v after a conv layer not supported yet.\n');
                     config.pipeline_forward{length(config.pipeline_forward)+1} = @conv2conv;
                 end
             elseif strcmp(config.forward_pass_scheme{idx+1}, 'conv_f')
@@ -341,7 +340,8 @@ function init(flag)
         config.pipeline_backprop{length(config.pipeline_backprop)+1} = @convBconv_last;
     end
     if strcmp(config.forward_pass_scheme{1}, 'conv_v_mask_norm')
-        config.pipeline_backprop{length(config.pipeline_backprop)+1} = @convBinput_with_mask_accel; %convBinput_with_mask;
+        config.pipeline_backprop{length(config.pipeline_backprop)+1} = @convBinput_with_mask_accel;
+        %config.pipeline_backprop{length(config.pipeline_backprop)+1} = @convBinput_with_mask;
     elseif strcmp(config.forward_pass_scheme{1}, 'conv_v_sr')
         config.pipeline_backprop{length(config.pipeline_backprop)+1} = @convBinput_SR;
     else
