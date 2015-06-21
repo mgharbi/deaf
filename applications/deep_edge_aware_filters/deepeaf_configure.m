@@ -5,7 +5,7 @@
 % [2] Jimmy SJ. Ren and Li Xu, "On Vectorization of Deep Convolutional Neural Networks for Vision Tasks", 
 % The 29th AAAI Conference on Artificial Intelligence (AAAI-15). Austin, Texas, USA, January 25-30, 2015
 %--------------------------------------------------------------------------------------------------------
-function deaf_configure()
+function deepeaf_configure()
     global config;
     % general configurations for both training and testing
     config.input_size = [64 64];
