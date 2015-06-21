@@ -16,7 +16,8 @@ function prepare_net_filter(input_x, input_y, w_path)
     
     load(w_path);
     persistent init_called;
-    if(isempty(init_called))
+    if(isempty(init_called) || ~strcmp(init_called, w_path))
+        fprintf('initializing a new model...\n');
         config = model;
         config.batch_size = 2;
         size_differ = [config.input_size(1)-config.output_size(1) config.input_size(2)-config.output_size(2)];
@@ -27,7 +28,7 @@ function prepare_net_filter(input_x, input_y, w_path)
         load(w_path);
         config.SCALE_INPUT = model.SCALE_INPUT;
         config.SCALE_OUTPUT = model.SCALE_OUTPUT;
-        init_called = 1;
+        init_called = w_path;
     end
     
     config.weights = model.weights;
