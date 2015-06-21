@@ -29,6 +29,8 @@ test_samples = test_samples(:,:,:,perm);
 test_labels = test_labels(:,:,:,perm);
 test_samples = config.NEW_MEM(test_samples(:,:,:,1:2000));
 test_labels = config.NEW_MEM(test_labels(:,:,:,1:2000));
+test_samples = test_samples * 2;
+test_labels = test_labels * 2;
 
 count = 0;
 cost_avg = 0;
@@ -46,6 +48,8 @@ for pass = 1:10
         
         train_imgs = config.NEW_MEM(samples);
         train_labels = config.NEW_MEM(labels);
+        train_imgs = train_imgs * 2;
+        train_labels = train_labels * 2;
         
         for i = 1:size(train_labels, 4) / config.batch_size            
             points_seen = points_seen + config.batch_size;
