@@ -14,6 +14,7 @@ function gen_output_from_conv_f()
         mem.output(:, :, :, b) = reshape(accumarray(mem.gen_out_matrix(:), reshape(out_act(:, :, b), size(out_act,1)*size(out_act,2), 1)), size(mem.output,1), size(mem.output,2), size(mem.output,3));
     end
     %}
+    config.SCALE_OUTPUT();  % this scaling may not be necessary in the future
     mem.output = bsxfun(@times, reshape(accumarray(mem.gen_out_matrix, mem.activations{length(mem.activations)}(:)), size(mem.output)), mem.one_over_add_counts);
     %mem.output = bsxfun(@times, mem.output, mem.one_over_add_counts);
 end
