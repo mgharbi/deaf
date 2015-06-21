@@ -237,6 +237,9 @@ function init(flag)
         end
     end
     
+    config.SCALE_INPUT = @scale_input_nil;
+    config.SCALE_OUTPUT = @scale_output_nil;
+    
     if flag ~= 0
         return;
     end
