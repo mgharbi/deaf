@@ -20,7 +20,7 @@ clearvars -global config;
 clearvars -global mem;
 clear;
 global config mem;
-deaf_configure();
+deepeaf_configure();
 init(0);
 
 load('data/deaf/L0/val/val_1');
