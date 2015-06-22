@@ -5,8 +5,8 @@
 % [2] Jimmy SJ. Ren and Li Xu, "On Vectorization of Deep Convolutional Neural Networks for Vision Tasks", 
 % The 29th AAAI Conference on Artificial Intelligence (AAAI-15). Austin, Texas, USA, January 25-30, 2015
 %--------------------------------------------------------------------------------------------------------
-addpath applications/image_filter/
-addpath applications/image_filter/utility/
+addpath applications/deep_edge_aware_filters/
+addpath applications/deep_edge_aware_filters/utility/
 addpath utils/
 addpath cuda/
 addpath mem/
@@ -23,7 +23,7 @@ global config mem;
 deepeaf_configure();
 init(0);
 
-load('data/deaf/L0/val/val_1');
+load('data/deepeaf/L0/val/val_1');
 perm = randperm(size(test_samples, 4));
 test_samples = test_samples(:,:,:,perm);
 test_labels = test_labels(:,:,:,perm);
@@ -41,7 +41,7 @@ save_points = 50000;
 fprintf('%s\n', datestr(now, 'dd-mm-yyyy HH:MM:SS FFF'));
 for pass = 1:10
     for p = 1:100
-        load(strcat('data/deaf/L0/train/patches_', num2str(p), '.mat'));        
+        load(strcat('data/deepeaf/L0/train/patches_', num2str(p), '.mat'));        
         perm = randperm(10000);
         samples = samples(:,:,:,perm);
         labels = labels(:,:,:,perm);
