@@ -23,12 +23,12 @@ Please visit the [project website](http://vcnn.deeplearning.cc) for all document
 
 ## Citation
 Cite our papers if you find this software useful.<br>
-1. Jimmy SJ. Ren and Li Xu, "[On Vectorization of Deep Convolutional Neural Networks for Vision Tasks](http://eportal.cityu.edu.hk/bbcswebdav/users/sjren2/~jimmy/papers/aaai_vcnn.pdf)", 
+1. Jimmy SJ. Ren and Li Xu, "[On Vectorization of Deep Convolutional Neural Networks for Vision Tasks](http://www.aaai.org/ocs/index.php/AAAI/AAAI15/paper/view/9988)", 
 The 29th AAAI Conference on Artificial Intelligence (<b>AAAI-15</b>). Austin, Texas, USA, January 25-30, 2015<br>
 
 ## Related Papers
 VCNN was used in the following papers.<br>
 1. Li Xu, Jimmy SJ. Ren, Ce Liu, Jiaya Jia, "[Deep Convolutional Neural Network for Image Deconvolution](http://papers.nips.cc/paper/5485-deep-convolutional-neural-network-for-image-deconvolution.pdf)", Advances in Neural Information Processing Systems (<b>NIPS 2014</b>). Montreal, Quebec, Canada, December 8-13, 2014<br>
-2. Li Xu, Jimmy SJ. Ren, Qiong Yan, Renjie Liao, Jiaya Jia, "Deep Edge-Aware Filters", The 32nd International Conference on Machine Learning (<b>ICML 2015</b>). Lille, France, July 6-11, 2015 <br>
+2. Li Xu, Jimmy SJ. Ren, Qiong Yan, Renjie Liao, Jiaya Jia, "[Deep Edge-Aware Filters](http://jmlr.org/proceedings/papers/v37/xub15.html)", The 32nd International Conference on Machine Learning (<b>ICML 2015</b>). Lille, France, July 6-11, 2015 <br>
 
 
