@@ -28,15 +28,19 @@ for m = 1 : 101
         for idx = 1:4
             patch_rotated = im2double(imrotate(patch, (idx-1)*90));
             patch_filtered = GT_filter(patch_rotated);
-            [vin, vout] = EdgeExtract(im2double(patch_rotated), im2double(patch_filtered));
-            samples(:,:,:,idx_list(idx)) = vin;
-            labels(:,:,:,idx_list(idx)) = vout;            
+            samples(:,:,:,idx_list(idx)) = patch_rotated;
+            labels(:,:,:,idx_list(idx)) = patch_filtered;            
+            % [vin, vout] = EdgeExtract(im2double(patch_rotated), im2double(patch_filtered));
+            % samples(:,:,:,idx_list(idx)) = vin;
+            % labels(:,:,:,idx_list(idx)) = vout;            
             
             patch_rotated = im2double(imrotate(patchHoriFlipped, (idx-1)*90));
             patch_filtered = GT_filter(patch_rotated);  
-            [vin, vout] = EdgeExtract(im2double(patch_rotated), im2double(patch_filtered));            
-            samples(:,:,:,idx_list(idx+4)) = vin;
-            labels(:,:,:,idx_list(idx+4)) = vout;            
+            samples(:,:,:,idx_list(idx)) = patch_rotated;
+            labels(:,:,:,idx_list(idx)) = patch_filtered;            
+            % [vin, vout] = EdgeExtract(im2double(patch_rotated), im2double(patch_filtered));            
+            % samples(:,:,:,idx_list(idx+4)) = vin;
+            % labels(:,:,:,idx_list(idx+4)) = vout;            
         end
     end
     samples = single(samples);

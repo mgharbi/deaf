@@ -1,11 +1,9 @@
 function output = apply_net_filter(input_v, input_h)
     global config mem;    
     input_size = size(input_v);
-    %output = config.NEW_MEM(zeros(size(input_v, 1), size(input_v, 2), config.chs, config.batch_size));
     output = zeros(size(input_v, 1), size(input_v, 2), config.chs, config.batch_size);
     p_size = config.MEM.p_size;
     size_differ = config.size_differ;
-    %count = config.NEW_MEM(zeros(size(input_v, 1), size(input_v, 2)));
     count = zeros(size(input_v, 1), size(input_v, 2));
     for v = 1 : length(config.MEM.start_rows)
         for h = 1 : length(config.MEM.start_cols)
@@ -39,10 +37,6 @@ function output = apply_net_filter(input_v, input_h)
     end
     count = max(count, 1);
     output = bsxfun(@rdivide, output, count);
-    %output = gather(output);
-    
-    %output = output_piece;
-    %output = padarray(output, [1 1]);
 end
 
 

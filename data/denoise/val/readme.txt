@@ -1,1 +1,0 @@
-This folder is to put the validation data for training.

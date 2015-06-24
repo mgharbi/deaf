@@ -24,31 +24,36 @@ deepeaf_configure();
 init(0);
 
 load('data/deepeaf/L0/val/val_1');
-perm = randperm(size(test_samples, 4));
+perm         = randperm(size(test_samples, 4));
 test_samples = test_samples(:,:,:,perm);
-test_labels = test_labels(:,:,:,perm);
+test_labels  = test_labels(:,:,:,perm);
 test_samples = config.NEW_MEM(test_samples(:,:,:,1:2000));
-test_labels = config.NEW_MEM(test_labels(:,:,:,1:2000));
+test_labels  = config.NEW_MEM(test_labels(:,:,:,1:2000));
 test_samples = test_samples * 2;
-test_labels = test_labels * 2;
+test_labels  = test_labels * 2;
 
-count = 0;
-cost_avg = 0;
-epoc = 0;
-points_seen = 0;
-display_points = 5000;
-save_points = 50000;
+count          = 0;
+cost_avg       = 0;
+epoc           = 0;
+points_seen    = 0;
+display_points = 100;
+save_points    = 1000;
+% display_points = 5000;
+% save_points    = 50000;
+nimage = 1
 fprintf('%s\n', datestr(now, 'dd-mm-yyyy HH:MM:SS FFF'));
+save_weights(strcat('output/epoc', num2str(0), '.mat'));
+config
 for pass = 1:10
-    for p = 1:100
+    for p = 1:nimage
         load(strcat('data/deepeaf/L0/train/patches_', num2str(p), '.mat'));        
-        perm = randperm(10000);
+        perm    = randperm(10000);
         samples = samples(:,:,:,perm);
-        labels = labels(:,:,:,perm);
+        labels  = labels(:,:,:,perm);
         
-        train_imgs = config.NEW_MEM(samples);
+        train_imgs   = config.NEW_MEM(samples);
         train_labels = config.NEW_MEM(labels);
-        train_imgs = train_imgs * 2;
+        train_imgs   = train_imgs * 2;
         train_labels = train_labels * 2;
         
         for i = 1:size(train_labels, 4) / config.batch_size            
@@ -91,7 +96,7 @@ for pass = 1:10
                 test_cost = test_cost / size(test_samples, 4);
                 fprintf('\nepoc %d, training avg cost: %f, test avg cost: %f\n', epoc, cost_avg, test_cost);
 
-                save_weights(strcat('d:\epoc', num2str(epoc), '.mat'));
+                save_weights(strcat('output/epoc', num2str(epoc), '.mat'));
                 cost_avg = 0;
             end
         end
