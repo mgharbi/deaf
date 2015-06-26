@@ -27,8 +27,8 @@ load('data/deepeaf/L0/val/val_1');
 perm         = randperm(size(test_samples, 4));
 test_samples = test_samples(:,:,:,perm);
 test_labels  = test_labels(:,:,:,perm);
-test_samples = config.NEW_MEM(test_samples(:,:,:,1:2000));
-test_labels  = config.NEW_MEM(test_labels(:,:,:,1:2000));
+test_samples = config.NEW_MEM(test_samples(:,:,:,1:100));
+test_labels  = config.NEW_MEM(test_labels(:,:,:,1:100));
 test_samples = test_samples * 2;
 test_labels  = test_labels * 2;
 
