@@ -20,6 +20,7 @@ function output = apply_net_filter(input_v, input_h)
                 h_start = h_end - p_size + 1;
             end
             input_piece = cat(4, input_v(v_start:v_end, h_start:h_end,:), permute(input_h(v_start:v_end, h_start:h_end,:), [2 1 3]));
+            keyboard
 
             op_test_pipe(input_piece, mem.fake_output_for_test);
             %output_piece = mem.output;

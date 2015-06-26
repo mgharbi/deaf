@@ -27,8 +27,8 @@ I = im2double(imread('applications/deep_edge_aware_filters/images/1.png'));
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % L0 smooth filter, lambda = 0.02, kappa default
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% model_path = 'applications/deep_edge_aware_filters/models/L0_smooth.mat';
-% beta = 8.388608e+03 / 2;
+model_path = 'applications/deep_edge_aware_filters/models/L0_smooth.mat';
+beta = 8.388608e+03 / 2;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % bilateral filter, sigma_s = 7, sigma_r = 0.1
