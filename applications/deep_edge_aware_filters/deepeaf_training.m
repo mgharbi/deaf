@@ -45,7 +45,7 @@ fprintf('%s\n', datestr(now, 'dd-mm-yyyy HH:MM:SS FFF'));
 for pass = 1:10
     for p = 1:nimage
         load(strcat('data/deepeaf/L0/train/patches_', num2str(p), '.mat'));        
-        perm    = randperm(10000);
+        perm    = randperm(1280);
         samples = samples(:,:,:,perm);
         labels  = labels(:,:,:,perm);
 
